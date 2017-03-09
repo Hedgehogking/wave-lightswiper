@@ -4,11 +4,25 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0'>
     <title>wave & swiper</title>
+    <script type="text/javascript">
+        var width = 1280,
+            height = 720;
+        if (window.innerWidth === 1920) {
+            width = 1920;
+            height = 1080;
+        }
+        var meta = document.createElement('meta');
+        meta.setAttribute('name', 'page-view-size');
+        meta.setAttribute('content', width + '*' + height);
+        document.querySelector('head').appendChild(meta);
+    </script>
     <style>
         * {
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         }
         body {
             background-color: white;

@@ -9,32 +9,20 @@
     
     .lower-wave-wrapper a {
         display: block;
+        position: relative;
         -webkit-box-flex: 1;
         -webkit-flex: 1;
         flex: 1;
         padding: 50px 0;
         text-align: center;
         margin-right: 10px;
-        background-color: lightblue;
-    }
-    
-    .lower-wave-wrapper a.goLeft {
-        /*-webkit-transition: -webkit-transform .2s linear;
-        -webkit-transform: translateX(-10px);
-        transition: transform .2s linear;
-        transform: translateX(-10px);*/
-    }
-    
-    .lower-wave-wrapper a.goRight {
-        /*-webkit-transition: -webkit-transform .2s linear;
-        -webkit-transform: translateX(10px);
-        transition: transform .2s linear;
-        transform: translateX(10px);*/
+        background-color: lightskyblue;
     }
     
     .lower-wave-wrapper a.active {
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         outline: none;
+        background-color: greenyellow;
         -webkit-animation: breat 2s linear infinite;
         animation: breat 2s linear infinite;
     }
@@ -65,16 +53,21 @@
 </style>
 <template>
     <div class="lower-wave-wrapper">
-        <a href='javascript:;' v-for='list in lists' v-text='list' @focus='getFocus($event)'></a>
+        <a href='javascript:;' v-for='list in listObjArr' v-text='list.item' @focus='getFocus($event, $index)'
+            :class='{active: $index === curLi}' 
+            :style='{left: list.left + "px", "margin-right": waveDistance + "px"}'></a>
     </div>
 </template>
 <script>
     export default {
         data() {
             return {
-                lis: null,
-                waveDistance: 10,
-                waveInterval: 200,
+                listObjArr: null,
+                curLi: null,
+                // 列表间的距离
+                waveDistance: 15,
+                // 每个列表项移动的时间
+                waveInterval: 300,
                 // 记录第几次点击
                 curWave: 0,
             };
@@ -88,46 +81,40 @@
             }
         },
         methods: {
-            getFocus(event) {
+            getFocus(event, idx) {
                 const tag = event.target;
                 if (tag.tagName.toLowerCase() === 'a') {
                     this.curWave++;
-                    this.lis.forEach((li, idx) => {
-                        li.classList.remove('active');
-                        li.style.transform = '';
+                    this.listObjArr.map((item, idx) => {
+                        item.left = 0;
                     });
-                    // 先等浏览器上一轮渲染完毕
-                    setTimeout(() => {
-                        tag.classList.add('active');
-                        const pre = tag.previousElementSibling;
-                        const next = tag.nextElementSibling;
-                        if (!!pre) {
-                            this.wave(pre, 'left', this.curWave);
-                        }
-                        if (!!next) {
-                            this.wave(next, 'right', this.curWave);
-                        }
-                    }, 16)
+                    this.curLi = idx;
+                    if (idx > 0) {
+                        this.wave(idx - 1, 'left', this.curWave);
+                    }
+                    if (idx < this.listObjArr.length - 1) {
+                        this.wave(idx + 1, 'right', this.curWave);
+                    }
                 }  
             },
-            wave(tag, direction, curWave) {
-                this.move(tag, direction, curWave, () => {
+            wave(idx, direction, curWave) {
+                this.move(idx, direction, curWave, () => {
                     if (direction === 'left') {
-                        if (!!tag.previousElementSibling) {
-                            this.wave(tag.previousElementSibling, direction, curWave);
+                        if (idx > 0) {
+                            this.wave(idx - 1, direction, curWave);
                         }
                     } else {
-                        if (!!tag.nextElementSibling) {
-                            this.wave(tag.nextElementSibling, direction, curWave);
+                        if (idx < this.listObjArr.length - 1) {
+                            this.wave(idx + 1, direction, curWave);
                         }
                     }
                 });
             },
-            move(tag, direction, curWave, callback) {
+            move(idx, direction, curWave, callback) {
                  let startTime = new Date().getTime();
                  const tmpDir = direction === 'left' ? -1 : 1;
                  const tmpInterval = setInterval(() => {
-                    // 判断移动时是否有了新的点击
+                    // 判断正在移动时是否有了新的点击
                     if (curWave !== this.curWave) {
                         clearInterval(tmpInterval);
                         return ;
@@ -135,16 +122,22 @@
                     const tmpTime = new Date().getTime();
                     if (tmpTime - startTime <= this.waveInterval) {
                         const tmpDis = (tmpTime - startTime) / this.waveInterval * this.waveDistance * tmpDir;
-                        tag.style.transform = 'translateX(' + tmpDis + 'px)';
+                        this.listObjArr[idx].left = tmpDis;
                     } else {
                         clearInterval(tmpInterval);
                         callback();
                     }
-                 }, 0)
+                 }, 0);
             },
         },
         ready() {
-            this.lis = document.querySelectorAll('.lower-wave-wrapper a');
+            this.listObjArr = this.lists.map((li, idx) => {
+                return {
+                    item: li,
+                    left: 0,
+                    active: false,
+                };
+            });
         },
     }
 

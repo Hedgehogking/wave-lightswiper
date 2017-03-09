@@ -4,6 +4,7 @@
         <wave :lists='slides'></wave>
         <swiper :slides='slides'></swiper>
         <lower-wave :lists='slides'></lower-wave>
+        <a href="javascript:location.reload();">刷新</a>
     </div>
 </template>
 <script>
