@@ -3,7 +3,7 @@
         position: relative;
         margin: 0 auto;
         width: 600px;
-        height: 400px;
+        height: 100px;
         overflow: hidden;
     }
     .swiper-slide {
